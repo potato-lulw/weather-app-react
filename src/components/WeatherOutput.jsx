@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useCity } from "../context/CityContextProvider";
+import GeoInfoCard from "./GeoInfoCard";
+import WeatherInfoCard from "./WeatherInfoCard";
+import Loading from "./Loading";
+import Error from "./error";
 
 const WeatherOutput = () => {
   const { city } = useCity();
@@ -7,8 +11,10 @@ const WeatherOutput = () => {
   const [error, setError] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-
+  const [country, setCountry] = useState("");
+  const [state, setState] = useState("");
   useEffect(() => {
+    console.log("Hello");
     const fetchGeoData = async () => {
       console.log("Fetching geo data");
       try {
@@ -17,16 +23,18 @@ const WeatherOutput = () => {
         );
         const data = await response.json();
         if (data.length > 0) {
-          const { lat, lon } = data[0];
+          const { lat, lon, country, state } = data[0];
           setLatLon({ lat, lon });
+          setCountry(country);
+          setState(state);
           setError(null);
         } else {
-          setError('No data found');
+          setError("No data found");
           setLatLon(null);
         }
         console.log(data);
       } catch (err) {
-        setError('Failed to fetch data');
+        setError("Failed to fetch data");
         setLatLon(null);
       }
     };
@@ -49,7 +57,7 @@ const WeatherOutput = () => {
         setError(null);
         console.log(data);
       } catch (err) {
-        setError('Failed to fetch weather data');
+        setError("Failed to fetch weather data");
         setWeatherData(null);
         console.log(err);
       }
@@ -61,26 +69,26 @@ const WeatherOutput = () => {
   }, [latLon, apiKey]);
 
   return (
-    <div className="bg-white mt-4 w-[80vw] flex justify-center items-center p-4">
-      <div>
-        <h2 className="text-2xl">
-          Showing details for
+    <div className=" mt-4 md:w-fit w-[95vw] flex justify-center items-center  ">
+      <div className="w-full">
+        <h2 className="text-2xl text-center">
+          Weather in
           <span className="text-sky-700 font-medium">&nbsp;{city}</span>
         </h2>
-        {error && <p className="text-red-500">{error}</p>}
-        {latLon && (
-          <div>
-            <p>Latitude: {latLon.lat}</p>
-            <p>Longitude: {latLon.lon}</p>
-          </div>
-        )}
-        {weatherData && (
-          <div>
-            <p>Temperature: {weatherData.main.temp}</p>
-            <p>Weather: {weatherData.weather[0].description}</p>
-            
-          </div>
-        )}
+        {error && <Error/>}
+        {/* todo: make an error card */}
+
+        <div className="flex justify-between w-full flex-col md:flex-row gap-2  items-center my-2">
+          <Suspense fallback={<Loading type={"spin"} color={"#bae6fd"}/>}>
+            {!error && weatherData && <WeatherInfoCard data={weatherData} />}
+          </Suspense>
+          <Suspense fallback={<Loading type={"spin"} color={"#bae6fd"} />}>
+            {!error && latLon && (
+              <GeoInfoCard latLon={latLon} country={country} state={state} />
+            )}
+          </Suspense>
+        </div>
+        {/* <Loading type={"spin"} color={"#bae6fd"} /> */}
       </div>
     </div>
   );

@@ -1,17 +1,17 @@
 import React from 'react'
 import CityInput from '../components/CityInput'
 import Hero from '../components/Hero'
-import WeatherOutput from '../components/WeatherOutput'
+// import WeatherOutput from '../components/WeatherOutput'
 import { useCity } from '../context/CityContextProvider'
 
 const Home = () => {
     const {city} = useCity();
   return (
-    <div className=' min-h-[90vh] h-screen w-screen flex flex-col justify-start items-center min-h relative overflow-hidden'>
+    <div className=' min-h-[100vh]  flex flex-col justify-start items-center  relative overflow-hidden'>
         
         <Hero/>
         <CityInput/>
-        {city !== "" && <WeatherOutput/>}
+        {/* {city !== "" && <WeatherOutput/>} */}
        
     </div>
   )
